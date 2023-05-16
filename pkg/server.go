@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/tiagogauziski/go-todo/internal/database"
-	"github.com/tiagogauziski/go-todo/internal/models"
+	"github.com/tiagogauziski/go-todo/pkg/database"
+	"github.com/tiagogauziski/go-todo/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,20 +34,7 @@ func getTodoById(id uint) (*models.Todo, error) {
 	return &todoModel, nil
 }
 
-func getTodo(context *gin.Context) {
-	id, err := strconv.ParseUint(context.Param("id"), 10, 32)
-	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid id."})
-		return
-	}
-
-	todo, err := getTodoById(uint(id))
-
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found."})
-		return
-	}
-
+func getTodo(context *gin.Context, todo *models.Todo) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
@@ -67,21 +54,10 @@ func addTodo(context *gin.Context) {
 	}
 }
 
-func updateTodo(context *gin.Context) {
+func updateTodo(context *gin.Context, todo *models.Todo) {
 	var updateTodo models.Todo
 	if err := context.BindJSON(&updateTodo); err != nil {
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to serialize todo."})
-		return
-	}
-
-	id, err := strconv.ParseUint(context.Param("id"), 10, 32)
-	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid id."})
-	}
-
-	todo, err := getTodoById(uint(id))
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found."})
 		return
 	}
 
@@ -98,18 +74,7 @@ func updateTodo(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
-func deleteTodo(context *gin.Context) {
-	id, err := strconv.ParseUint(context.Param("id"), 10, 32)
-	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid id."})
-	}
-
-	todo, err := getTodoById(uint(id))
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found."})
-		return
-	}
-
+func deleteTodo(context *gin.Context, todo *models.Todo) {
 	database.Database.Delete(&todo)
 
 	result := database.Database.Save(&todo)
@@ -121,20 +86,7 @@ func deleteTodo(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
-func toggleTodoStatus(context *gin.Context) {
-	id, err := strconv.ParseUint(context.Param("id"), 10, 32)
-	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid id."})
-		return
-	}
-
-	todo, err := getTodoById(uint(id))
-
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found."})
-		return
-	}
-
+func toggleTodoStatus(context *gin.Context, todo *models.Todo) {
 	todo.Completed = !todo.Completed
 
 	result := database.Database.Save(&todo)
@@ -146,15 +98,35 @@ func toggleTodoStatus(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
-func StartServer() {
-	router := gin.Default()
+func getTodoWithValidationHandler(handler func(*gin.Context, *models.Todo)) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		id, err := strconv.ParseUint(context.Param("id"), 10, 32)
+		if err != nil {
+			context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid id."})
+			return
+		}
 
-	router.GET("/todos", getTodos)
-	router.GET("/todos/:id", getTodo)
-	router.PATCH("/todos/:id", toggleTodoStatus)
-	router.PUT("/todos/:id", updateTodo)
-	router.DELETE("/todos/:id", deleteTodo)
-	router.POST("/todos", addTodo)
+		var todo *models.Todo
+		todo, err = getTodoById(uint(id))
 
-	router.Run()
+		if err != nil {
+			context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found."})
+			return
+		}
+
+		handler(context, todo)
+	}
+}
+
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+
+	r.GET("/todos", getTodos)
+	r.GET("/todos/:id", getTodoWithValidationHandler(getTodo))
+	r.PATCH("/todos/:id", getTodoWithValidationHandler(toggleTodoStatus))
+	r.PUT("/todos/:id", getTodoWithValidationHandler(updateTodo))
+	r.DELETE("/todos/:id", getTodoWithValidationHandler(deleteTodo))
+	r.POST("/todos", addTodo)
+
+	return r
 }

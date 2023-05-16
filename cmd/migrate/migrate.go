@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/tiagogauziski/go-todo/internal/database"
-	"github.com/tiagogauziski/go-todo/internal/models"
+	"github.com/tiagogauziski/go-todo/pkg/database"
+	"github.com/tiagogauziski/go-todo/pkg/models"
 
 	"github.com/joho/godotenv"
 )
