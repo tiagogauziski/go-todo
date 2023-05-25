@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	internal "github.com/tiagogauziski/go-todo/pkg"
+	"github.com/tiagogauziski/go-todo/pkg"
 	"github.com/tiagogauziski/go-todo/pkg/database"
 
 	"github.com/joho/godotenv"
@@ -21,7 +21,7 @@ func init() {
 }
 
 func main() {
-	router := internal.SetupRouter()
+	router := pkg.SetupRouter()
 
 	router.Run()
 }
