@@ -34,7 +34,7 @@ func getTodoById(id uint) (*models.Todo, error) {
 	return &todoModel, nil
 }
 
-func getTodo(context *gin.Context, todo *models.Todo) {
+func GetTodo(context *gin.Context, todo *models.Todo) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
@@ -122,7 +122,7 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/todos", getTodos)
-	r.GET("/todos/:id", getTodoWithValidationHandler(getTodo))
+	r.GET("/todos/:id", getTodoWithValidationHandler(GetTodo))
 	r.PATCH("/todos/:id", getTodoWithValidationHandler(toggleTodoStatus))
 	r.PUT("/todos/:id", getTodoWithValidationHandler(updateTodo))
 	r.DELETE("/todos/:id", getTodoWithValidationHandler(deleteTodo))

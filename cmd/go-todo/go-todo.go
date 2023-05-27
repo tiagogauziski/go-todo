@@ -11,10 +11,10 @@ import (
 )
 
 func init() {
-	err := godotenv.Load("../../.env", "../../.env.dev")
+	err := godotenv.Load(".env", ".env.dev")
 
 	if err != nil {
-		log.Fatal("Error loading .env file.")
+		log.Println("WARN: Unable to locate .env files.")
 	}
 
 	database.ConnectDatabase(os.Getenv("DATABASE_URL"))

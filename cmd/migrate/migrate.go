@@ -17,7 +17,7 @@ func init() {
 		log.Fatal("Error loading .env file.")
 	}
 
-	database.ConnectDatabase(os.Getenv("DATABASE_URL"))
+	database.ConnectDatabase(os.Getenv("DATABASE_URI"))
 }
 
 func main() {

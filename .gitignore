@@ -22,3 +22,6 @@ go.work
 
 # Ignore dev environment variables
 .env.dev
+
+# VSCode
+.vscode/
