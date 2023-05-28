@@ -4,14 +4,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/tiagogauziski/go-todo/pkg"
-	"github.com/tiagogauziski/go-todo/pkg/database"
+	"github.com/tiagogauziski/go-todo/internal"
+	"github.com/tiagogauziski/go-todo/internal/database"
 
 	"github.com/joho/godotenv"
 )
 
 func init() {
-	err := godotenv.Load(".env", "../.env", "../../.env")
+	err := godotenv.Load("../../.env", "../.env", ".env")
 
 	if err != nil {
 		log.Println("WARN: Unable to locate .env files.")
@@ -21,7 +21,7 @@ func init() {
 }
 
 func main() {
-	router := pkg.SetupRouter()
+	router := internal.SetupRouter()
 
 	router.Run()
 }

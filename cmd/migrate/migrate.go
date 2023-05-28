@@ -4,14 +4,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/tiagogauziski/go-todo/pkg/database"
-	"github.com/tiagogauziski/go-todo/pkg/models"
+	"github.com/tiagogauziski/go-todo/internal/database"
+	"github.com/tiagogauziski/go-todo/internal/models"
 
 	"github.com/joho/godotenv"
 )
 
 func init() {
-	err := godotenv.Load()
+	err := godotenv.Load("../../.env", "../.env", ".env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file.")

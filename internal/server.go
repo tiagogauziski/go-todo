@@ -1,12 +1,12 @@
-package pkg
+package internal
 
 import (
 	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/tiagogauziski/go-todo/pkg/database"
-	"github.com/tiagogauziski/go-todo/pkg/models"
+	"github.com/tiagogauziski/go-todo/internal/database"
+	"github.com/tiagogauziski/go-todo/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

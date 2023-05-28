@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+    database:
+        image: mysql:8
+        container_name: database-mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=Network1
+        ports:
+            - "3306:3306"
+    app:
+        container_name: go-todo-test
+        build:
+            context: ../../
+            dockerfile: ./build/go-todo/Dockerfile.test
+        ports:
+            - "9000:9000"
+        # working_dir: /app
+        environment:
+            - DATABASE_TEST_URI=root:Network1@tcp(database-mysql:3306)/todo-test?parseTime=true
+        depends_on:
+            - database

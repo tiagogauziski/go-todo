@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 import (
 	"bytes"
@@ -11,15 +11,21 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
-	"github.com/tiagogauziski/go-todo/pkg/database"
-	"github.com/tiagogauziski/go-todo/pkg/models"
+	"github.com/tiagogauziski/go-todo/internal/database"
+	"github.com/tiagogauziski/go-todo/internal/models"
 )
 
 func setup() {
-	os.Setenv("DATABASE_URI", "todo_user:Network1@tcp(raspberrypi:31835)/todo-test?parseTime=true")
+	err := godotenv.Load("../.env", ".env")
 
-	database.ConnectDatabase(os.Getenv("DATABASE_URI"))
+	if err != nil {
+		log.Println("WARN: Unable to locate .env files.")
+	}
+
+	database.ConnectDatabase(os.Getenv("DATABASE_TEST_URI"))
+	database.CreateDatabase()
 	database.RunMigrations()
 }
 

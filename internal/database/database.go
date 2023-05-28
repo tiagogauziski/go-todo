@@ -3,7 +3,7 @@ package database
 import (
 	"log"
 
-	"github.com/tiagogauziski/go-todo/pkg/models"
+	"github.com/tiagogauziski/go-todo/internal/models"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,6 +20,14 @@ func ConnectDatabase(dsn string) {
 	}
 
 	Database = db
+}
+
+func CreateDatabase() {
+	if Database == nil {
+		log.Fatal("Database not initialised.")
+	}
+
+	// TODO: create database if not exists
 }
 
 func RunMigrations() {
