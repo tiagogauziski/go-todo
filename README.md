@@ -28,11 +28,13 @@ docker-compose up -f ./build/go-todo/docker-compose.test.yaml
 ```
 
 ## Environment Variables
-- Database connection
+```bash
+# Database connection
 DATABASE_URI=<USER>:<PASSWORD>@tcp(<HOSTNAME>:31835)/<DATABASE_NAME>?parseTime=true
 
-- Run integeration tests
+# Database connection for running tests
 DATABASE_TEST_URI=<USER>:<PASSWORD>@tcp(<HOSTNAME>:31835)/<DATABASE_NAME>?parseTime=true
 
-- Gin port
+# Gin port
 PORT=9000
+```
