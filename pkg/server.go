@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func getTodos(context *gin.Context) {
+func GetTodos(context *gin.Context) {
 	var todos []models.Todo
 	result := database.Database.Find(&todos)
 
@@ -23,22 +23,11 @@ func getTodos(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, todos)
 }
 
-func getTodoById(id uint) (*models.Todo, error) {
-	var todoModel models.Todo
-	result := database.Database.First(&todoModel, id)
-
-	if result.Error != nil {
-		return nil, errors.New("invalid id")
-	}
-
-	return &todoModel, nil
-}
-
 func GetTodo(context *gin.Context, todo *models.Todo) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
-func addTodo(context *gin.Context) {
+func AddTodo(context *gin.Context) {
 	var newTodo models.Todo
 	if err := context.BindJSON(&newTodo); err != nil {
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to serialize todo."})
@@ -54,7 +43,7 @@ func addTodo(context *gin.Context) {
 	}
 }
 
-func updateTodo(context *gin.Context, todo *models.Todo) {
+func UpdateTodo(context *gin.Context, todo *models.Todo) {
 	var updateTodo models.Todo
 	if err := context.BindJSON(&updateTodo); err != nil {
 		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Failed to serialize todo."})
@@ -74,7 +63,7 @@ func updateTodo(context *gin.Context, todo *models.Todo) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
-func deleteTodo(context *gin.Context, todo *models.Todo) {
+func DeleteTodo(context *gin.Context, todo *models.Todo) {
 	database.Database.Delete(&todo)
 
 	result := database.Database.Save(&todo)
@@ -86,7 +75,7 @@ func deleteTodo(context *gin.Context, todo *models.Todo) {
 	context.IndentedJSON(http.StatusOK, todo)
 }
 
-func toggleTodoStatus(context *gin.Context, todo *models.Todo) {
+func ToggleTodoStatus(context *gin.Context, todo *models.Todo) {
 	todo.Completed = !todo.Completed
 
 	result := database.Database.Save(&todo)
@@ -118,15 +107,26 @@ func getTodoWithValidationHandler(handler func(*gin.Context, *models.Todo)) gin.
 	}
 }
 
+func getTodoById(id uint) (*models.Todo, error) {
+	var todoModel models.Todo
+	result := database.Database.First(&todoModel, id)
+
+	if result.Error != nil {
+		return nil, errors.New("invalid id")
+	}
+
+	return &todoModel, nil
+}
+
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	r.GET("/todos", getTodos)
+	r.GET("/todos", GetTodos)
 	r.GET("/todos/:id", getTodoWithValidationHandler(GetTodo))
-	r.PATCH("/todos/:id", getTodoWithValidationHandler(toggleTodoStatus))
-	r.PUT("/todos/:id", getTodoWithValidationHandler(updateTodo))
-	r.DELETE("/todos/:id", getTodoWithValidationHandler(deleteTodo))
-	r.POST("/todos", addTodo)
+	r.PATCH("/todos/:id", getTodoWithValidationHandler(ToggleTodoStatus))
+	r.PUT("/todos/:id", getTodoWithValidationHandler(UpdateTodo))
+	r.DELETE("/todos/:id", getTodoWithValidationHandler(DeleteTodo))
+	r.POST("/todos", AddTodo)
 
 	return r
 }

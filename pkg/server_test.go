@@ -17,15 +17,10 @@ import (
 )
 
 func setup() {
-	os.Setenv("DATABASE_URL", "todo_user:Network1@tcp(raspberrypi:31835)/todo-test?parseTime=true")
+	os.Setenv("DATABASE_URI", "todo_user:Network1@tcp(raspberrypi:31835)/todo-test?parseTime=true")
 
-	database.ConnectDatabase(os.Getenv("DATABASE_URL"))
-
-	err := database.Database.AutoMigrate(&models.Todo{})
-
-	if err != nil {
-		log.Fatal("Failed to run database migrations.")
-	}
+	database.ConnectDatabase(os.Getenv("DATABASE_URI"))
+	database.RunMigrations()
 }
 
 func teardown() {
@@ -56,63 +51,67 @@ func TestPostTodo(t *testing.T) {
 	router := SetupRouter()
 
 	todo := models.Todo{
-		ID:        1,
-		Item:      "Test item",
+		Item:      "Test item POST",
 		Completed: false,
 	}
 
-	w, _ := postTodo(router, &todo)
+	code, postTodo := postTodo(router, &todo)
 
-	assert.Equal(t, 201, w.Code)
+	assert.Equal(t, 201, code)
 
-	var responseTodo = models.Todo{}
-	json.Unmarshal(w.Body.Bytes(), &responseTodo)
-
-	assert.Equal(t, todo.ID, responseTodo.ID)
-	assert.Equal(t, todo.Item, responseTodo.Item)
-	assert.Equal(t, todo.Completed, responseTodo.Completed)
+	assert.Equal(t, todo.Item, postTodo.Item)
+	assert.Equal(t, todo.Completed, postTodo.Completed)
 }
 
 func TestGetTodo(t *testing.T) {
 	router := SetupRouter()
 
 	todo := models.Todo{
-		ID:        2,
-		Item:      "Test item",
+		Item:      "Test item GET",
 		Completed: false,
 	}
 
-	w, _ := postTodo(router, &todo)
+	code, postTodo := postTodo(router, &todo)
 
-	assert.Equal(t, 201, w.Code)
+	assert.Equal(t, 201, code)
 
-	w, _ = getTodo(router, todo.ID)
+	code, getTodo := getTodo(router, postTodo.ID)
 
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, 200, code)
 
-	var getTodo = models.Todo{}
-	json.Unmarshal(w.Body.Bytes(), &getTodo)
-
-	assert.Equal(t, todo.ID, getTodo.ID)
 	assert.Equal(t, todo.Item, getTodo.Item)
 	assert.Equal(t, todo.Completed, getTodo.Completed)
 }
 
-func postTodo(router *gin.Engine, request *models.Todo) (*httptest.ResponseRecorder, *http.Request) {
+func postTodo(router *gin.Engine, request *models.Todo) (int, *models.Todo) {
 	w := httptest.NewRecorder()
-	json, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", "/todos", bytes.NewBuffer(json))
+	reqJson, _ := json.Marshal(request)
+	req, _ := http.NewRequest("POST", "/todos", bytes.NewBuffer(reqJson))
 
 	router.ServeHTTP(w, req)
 
-	return w, req
+	if w.Code == 201 {
+		var responseTodo = models.Todo{}
+		json.Unmarshal(w.Body.Bytes(), &responseTodo)
+
+		return w.Code, &responseTodo
+	}
+
+	return w.Code, nil
 }
 
-func getTodo(router *gin.Engine, id uint) (*httptest.ResponseRecorder, *http.Request) {
+func getTodo(router *gin.Engine, id uint) (int, *models.Todo) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/todos/"+strconv.FormatUint(uint64(id), 10), nil)
 
 	router.ServeHTTP(w, req)
 
-	return w, req
+	if w.Code == 200 {
+		var responseTodo = models.Todo{}
+		json.Unmarshal(w.Body.Bytes(), &responseTodo)
+
+		return w.Code, &responseTodo
+	}
+
+	return w.Code, nil
 }

@@ -17,7 +17,7 @@ func init() {
 		log.Println("WARN: Unable to locate .env files.")
 	}
 
-	database.ConnectDatabase(os.Getenv("DATABASE_URL"))
+	database.ConnectDatabase(os.Getenv("DATABASE_URI"))
 }
 
 func main() {

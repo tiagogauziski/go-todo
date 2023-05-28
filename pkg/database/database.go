@@ -3,6 +3,8 @@ package database
 import (
 	"log"
 
+	"github.com/tiagogauziski/go-todo/pkg/models"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -18,4 +20,12 @@ func ConnectDatabase(dsn string) {
 	}
 
 	Database = db
+}
+
+func RunMigrations() {
+	err := Database.AutoMigrate(&models.Todo{})
+
+	if err != nil {
+		log.Fatal("Failed to run database migrations.")
+	}
 }
