@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	err := godotenv.Load(".env", ".env.dev")
+	err := godotenv.Load(".env", "../.env", "../../.env")
 
 	if err != nil {
 		log.Println("WARN: Unable to locate .env files.")
