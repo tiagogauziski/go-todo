@@ -5,8 +5,13 @@ services:
         container_name: database-mysql
         environment:
             - MYSQL_ROOT_PASSWORD=Network1
+            - MYSQL_DATABASE=todo-test
         ports:
             - "3306:3306"
+        healthcheck:
+            test: mysql --user=root --password=Network1 -e 'USE `todo-test`'
+            retries: 10
+            interval: 2s
     app:
         container_name: go-todo-test
         build:
@@ -18,4 +23,5 @@ services:
         environment:
             - DATABASE_TEST_URI=root:Network1@tcp(database-mysql:3306)/todo-test?parseTime=true
         depends_on:
-            - database
+            database:
+                condition: service_healthy

@@ -22,14 +22,6 @@ func ConnectDatabase(dsn string) {
 	Database = db
 }
 
-func CreateDatabase() {
-	if Database == nil {
-		log.Fatal("Database not initialised.")
-	}
-
-	// TODO: create database if not exists
-}
-
 func RunMigrations() {
 	err := Database.AutoMigrate(&models.Todo{})
 

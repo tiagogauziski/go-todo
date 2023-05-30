@@ -24,8 +24,9 @@ func setup() {
 		log.Println("WARN: Unable to locate .env files.")
 	}
 
+	// database.CreateDatabase(os.Getenv("DATABASE_TEST_URI"))
+
 	database.ConnectDatabase(os.Getenv("DATABASE_TEST_URI"))
-	database.CreateDatabase()
 	database.RunMigrations()
 }
 
